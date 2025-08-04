@@ -1,34 +1,41 @@
 
-/* Color Palette */
+/* Color Palette - Android 12 Material You Green */
 :root {
-  --federal-blue: #03045e;
-  --marian-blue: #023e8a;
-  --honolulu-blue: #0077b6;
-  --blue-green: #0096c7;
-  --pacific-cyan: #00b4d8;
-  --vivid-sky-blue: #48cae4;
-  --non-photo-blue: #90e0ef;
-  --non-photo-blue-2: #ade8f4;
-  --light-cyan: #caf0f8;
-  --warm-brown: #8B5A3C;
-  --light-beige: #F5E6D3;
-  --primary-color: #8B5A3C;
+  --primary-color: #1B6B4D;     /* Main green shade */
+  --primary-light: #338A6B;     /* Lighter variant */
+  --primary-dark: #0D503A;      /* Darker variant */
+  --accent-color: #4CAF82;      /* Accent green */
+  --surface-color: #E8F5EF;     /* Light surface color */
+  --background-color: #F5FAF7;  /* Very light background */
+  --text-primary: #1A1C19;      /* Dark text */
+  --text-secondary: #424940;    /* Secondary text */
+  --error-color: #BA1A1A;       /* Error state */
+  --outline-color: #72796F;     /* Outline/border color */
+  --warm-brown: #1B6B4D;        /* Changed to primary green */
 }
 
 /* Sticky Header */
 .sticky-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: rgba(255, 255, 255, 0.9);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(139, 90, 60, 0.2);
-    padding: 1rem 2rem;
-    transform: translateY(-100%);
-    transition: transform 0.3s ease;
-    box-shadow: 0 2px 20px rgba(139, 90, 60, 0.15);
+    display: none; /* Hidden by default */
+}
+
+/* Only show sticky header on desktop/larger screens */
+@media (min-width: 1024px) {
+    .sticky-header {
+        display: block;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(139, 90, 60, 0.2);
+        padding: 1rem 2rem;
+        transform: translateY(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 0 2px 20px rgba(139, 90, 60, 0.15);
+    }
 }
 
 .sticky-header.visible {
@@ -90,14 +97,14 @@ html {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'San Francisco', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background: var(--light-beige);
-    color: #333;
+    background: var(--background-color);
+    color: var(--text-primary);
     overflow-x: hidden;
     scroll-behavior: smooth;
     /* Windows scroll fixes */
     -ms-overflow-style: -ms-autohiding-scrollbar;
     scrollbar-width: thin;
-    scrollbar-color: var(--warm-brown) transparent;
+    scrollbar-color: var(--primary-color) transparent;
     height: 100%;
     min-height: 100vh;
 }
@@ -155,7 +162,7 @@ main {
     justify-content: center;
     padding: 0;
     margin: 0;
-    background: var(--light-beige);
+    background: var(--surface-color);
     border: none !important;
     box-shadow: none !important;
     position: relative;
@@ -185,14 +192,20 @@ main {
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     background: #ccc; /* Placeholder color if image not found */
+    border: 4px solid var(--warm-brown);
+    box-shadow: 
+        0 10px 30px rgba(0,0,0,0.2),
+        0 0 0 4px rgba(139, 90, 60, 0.1);
 }
 
 .profile-photo-placeholder {
     width: 400px;
     height: 500px;
-    border-color: black 3px solid;
+    border: 4px solid var(--warm-brown);
     border-radius: 12px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 
+        0 10px 30px rgba(0,0,0,0.2),
+        0 0 0 4px rgba(139, 90, 60, 0.1);
     background-image: url('assets/images/profile.jpg');
     background-size: cover;
     background-position: center;
@@ -222,7 +235,7 @@ main {
 .hero-name {
     font-size: 5rem;
     font-weight: 900;
-    color: var(--warm-brown);
+    color: var(--primary-color);
     margin: 0 0 1rem 0;
     line-height: 0.9;
     letter-spacing: -0.02em;
@@ -365,7 +378,7 @@ main {
 
 /* Footer */
 footer {
-    background: var(--warm-brown);
+    background: var(--primary-color);
     color: white;
     text-align: center;
     padding: 1rem 0;
@@ -385,23 +398,26 @@ section[style*="display: none"] {
 /* Content Grid and Cards */
 .content-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-top: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+    gap: clamp(1rem, 3vw, 1.5rem);
+    margin-top: clamp(1.5rem, 4vw, 2rem);
+    width: 100%;
+    padding: 0 clamp(1rem, 3vw, 2rem);
 }
 
 .card {
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 15px;
-    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(27, 107, 77, 0.1);
+    border-radius: clamp(12px, 2vw, 15px);
+    padding: clamp(1rem, 3vw, 1.5rem);
     box-shadow: 
-        0 8px 24px rgba(139, 90, 60, 0.12),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        0 8px 24px rgba(27, 107, 77, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
+    width: 100%;
+    height: 100%;
 }
 
 .card::before {
@@ -439,12 +455,12 @@ section[style*="display: none"] {
 }
 
 .card h3 {
-    color: var(--warm-brown);
-    font-size: 1.3rem;
+    color: var(--primary-color);
+    font-size: clamp(1.1rem, 3vw, 1.3rem);
     font-weight: 600;
-    margin-bottom: 0.8rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid rgba(139, 90, 60, 0.2);
+    margin-bottom: clamp(0.6rem, 2vw, 0.8rem);
+    padding-bottom: clamp(0.3rem, 1vw, 0.5rem);
+    border-bottom: 1px solid rgba(27, 107, 77, 0.2);
     position: relative;
     letter-spacing: 0.5px;
     line-height: 1.4;
@@ -466,55 +482,41 @@ section[style*="display: none"] {
 }
 
 .card p {
-    color: #555;
-    font-size: 1rem;
+    color: var(--text-primary);
+    font-size: clamp(0.9rem, 2.5vw, 1rem);
     line-height: 1.6;
     margin: 0;
+    font-weight: 500;
 }
 
 /* Section Styling */
 section {
-    backdrop-filter: blur(20px);
-    padding: 3rem 2rem;
-    margin-bottom: 3rem;
-    min-height: 600px;
+    padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 3vw, 2rem);
+    margin-bottom: clamp(2rem, 5vw, 3rem);
+    min-height: min(100vh, 600px);
     display: flex;
     flex-direction: column;
     position: relative;
-    overflow: hidden;
-}
-
-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(
-        135deg,
-        rgba(245, 230, 211, 0.4) 0%,
-        rgba(139, 90, 60, 0.1) 50%,
-        rgba(245, 230, 211, 0.4) 100%
-    );
-    border-radius: 20px;
-    z-index: -1;
+    width: 100%;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 section h2 {
-    font-size: 3rem;
+    font-size: clamp(2rem, 5vw, 3rem);
     font-weight: 700;
-    color: var(--warm-brown);
+    color: var(--primary-color);
     text-align: left;
-    margin-bottom: 2rem;
+    margin-bottom: clamp(1.5rem, 4vw, 2rem);
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--warm-brown);
+    border-bottom: 2px solid var(--primary-color);
     position: relative;
     background: linear-gradient(
         135deg,
-        var(--warm-brown) 0%,
-        #A0754A 50%,
-        var(--warm-brown) 100%
+        var(--primary-color) 0%,
+        var(--accent-color) 50%,
+        var(--primary-color) 100%
     );
     -webkit-background-clip: text;
     background-clip: text;
@@ -572,40 +574,16 @@ section h2 {
         min-height: 100vh;
     }
     
-    /* Maintain glassmorphism blocks on mobile */
     section {
-        background: rgba(245, 230, 211, 0.7);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 15px;
         padding: 2rem 1rem;
         margin-bottom: 2rem;
-        box-shadow: 
-            0 6px 20px rgba(139, 90, 60, 0.12),
-            inset 0 1px 0 rgba(255, 255, 255, 0.2);
         min-height: auto;
         display: flex;
         flex-direction: column;
         position: relative;
-        overflow: hidden;
     }
     
-    section::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: linear-gradient(
-            135deg,
-            rgba(245, 230, 211, 0.3) 0%,
-            rgba(139, 90, 60, 0.08) 50%,
-            rgba(245, 230, 211, 0.3) 100%
-        );
-        border-radius: 15px;
-        z-index: -1;
-    }
+    /* Removed section background gradient */
     
     /* Glassmorphism section headers */
     section h2 {
