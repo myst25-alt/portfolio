@@ -806,6 +806,39 @@ section h2::after {
         padding: 0 1rem;
     }
     
+    /* Semester Page Header - Mobile Fix */
+    div[style*="min-height: 100vh"] h1 {
+        font-size: 3rem !important;
+        line-height: 1.1 !important;
+        margin: 0.5rem 0 !important;
+        padding: 0 1rem !important;
+        word-wrap: break-word !important;
+        overflow-wrap: break-word !important;
+    }
+    
+    div[style*="min-height: 100vh"] p {
+        font-size: 1.1rem !important;
+        margin-top: 0.5rem !important;
+        padding: 0 1rem !important;
+    }
+    
+    /* Navigation buttons on semester pages - Mobile */
+    div[style*="position: absolute"][style*="top: 2rem"] {
+        top: 1rem !important;
+        left: 1rem !important;
+        right: 1rem !important;
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+        align-items: center !important;
+    }
+    
+    div[style*="position: absolute"][style*="top: 2rem"] .nav-button {
+        padding: 0.6rem 1rem !important;
+        font-size: 0.9rem !important;
+        min-width: 120px !important;
+        text-align: center !important;
+    }
+    
     /* Content Grid */
     .content-grid {
         grid-template-columns: 1fr;
