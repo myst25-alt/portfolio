@@ -53,21 +53,38 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Fix touch events on navigation buttons
-    const navButtons = document.querySelectorAll('.prev, .next, .nav-button');
+    const navButtons = document.querySelectorAll('.prev, .next, .nav-button, .feedback-toggle-btn, .pdf-toggle-btn');
     navButtons.forEach(button => {
-        // Prevent default touch behavior
+        // Add visual feedback for touch without preventing default behavior
         button.addEventListener('touchstart', function(e) {
-            e.preventDefault();
-        }, { passive: false });
-        
-        // Add visual feedback for touch
-        button.addEventListener('touchstart', function() {
             this.style.opacity = '0.7';
-        });
+            this.style.transform = 'scale(0.95)';
+        }, { passive: true });
         
-        button.addEventListener('touchend', function() {
+        button.addEventListener('touchend', function(e) {
             this.style.opacity = '1';
-        });
+            this.style.transform = 'scale(1)';
+            
+            // Ensure click event fires on mobile
+            if (!e.defaultPrevented) {
+                // Trigger click event if it hasn't already fired
+                setTimeout(() => {
+                    this.click();
+                }, 50);
+            }
+        }, { passive: true });
+        
+        button.addEventListener('touchcancel', function() {
+            this.style.opacity = '1';
+            this.style.transform = 'scale(1)';
+        }, { passive: true });
+        
+        // Improve touch target size for better mobile usability
+        if (button.classList.contains('prev') || button.classList.contains('next')) {
+            button.style.minWidth = '44px';
+            button.style.minHeight = '44px';
+            button.style.touchAction = 'manipulation';
+        }
     });
     
     // Optimize scroll performance on mobile

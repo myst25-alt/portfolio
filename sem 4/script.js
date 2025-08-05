@@ -187,22 +187,37 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCounter();
 
         if (prevBtn && nextBtn) {
-            prevBtn.addEventListener('click', (e) => {
+            // Add both click and touch event listeners for mobile compatibility
+            const handlePrevious = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 isVideoPaused = false;
                 clearInterval(autoAdvanceInterval);
                 currentSlide = (currentSlide - 1 + slides.length) % slides.length;
                 showSlide(currentSlide);
                 console.log(`Slideshow ${index}: Previous clicked, now showing slide ${currentSlide + 1}`);
-            });
-
-            nextBtn.addEventListener('click', (e) => {
+            };
+            
+            const handleNext = (e) => {
                 e.preventDefault();
+                e.stopPropagation();
                 isVideoPaused = false;
                 clearInterval(autoAdvanceInterval);
                 currentSlide = (currentSlide + 1) % slides.length;
                 showSlide(currentSlide);
                 console.log(`Slideshow ${index}: Next clicked, now showing slide ${currentSlide + 1}`);
+            };
+
+            prevBtn.addEventListener('click', handlePrevious);
+            prevBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handlePrevious(e);
+            });
+
+            nextBtn.addEventListener('click', handleNext);
+            nextBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                handleNext(e);
             });
         }
 
