@@ -1,5 +1,39 @@
-// Portfolio JavaScript functionality
+// Portfolio JavaScript functionality - Enhanced Mobile Support
 document.addEventListener('DOMContentLoaded', function() {
+    // Mobile detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    
+    // Add mobile class to body for CSS targeting
+    if (isMobile) {
+        document.body.classList.add('mobile-device');
+    }
+    if (isAndroid) {
+        document.body.classList.add('android-device');
+    }
+    if (isIOS) {
+        document.body.classList.add('ios-device');
+    }
+    
+    // Prevent zoom on form elements (mobile)
+    if (isMobile) {
+        document.addEventListener('touchstart', function(e) {
+            if (e.touches.length > 1) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+        
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(e) {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+    }
+    
     // Sticky header functionality
     const stickyHeader = document.getElementById('stickyHeader');
     const heroSection = document.getElementById('hero');
@@ -144,7 +178,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Removed gradient animation to improve performance
     // The hero section now uses static styling
 
-    // Slideshow functionality for images and videos
+    // Slideshow functionality for images and videos - Enhanced Mobile Support
     function initSlideshow(container) {
         const slides = container.querySelectorAll('.slides > *');
         const prevBtn = container.querySelector('.prev');
@@ -152,8 +186,45 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentSlide = 0;
         let autoAdvanceInterval;
         let isVideoPaused = false;
+        let touchStartX = 0;
+        let touchEndX = 0;
 
         if (slides.length === 0) return;
+
+        // Add touch/swipe support for mobile
+        if (isMobile) {
+            const slidesContainer = container.querySelector('.slides');
+            
+            slidesContainer.addEventListener('touchstart', function(e) {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+            
+            slidesContainer.addEventListener('touchend', function(e) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+            
+            function handleSwipe() {
+                const swipeThreshold = 50;
+                const swipeDistance = touchEndX - touchStartX;
+                
+                if (Math.abs(swipeDistance) > swipeThreshold) {
+                    if (swipeDistance > 0) {
+                        // Swipe right - previous slide
+                        isVideoPaused = false;
+                        clearInterval(autoAdvanceInterval);
+                        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                        showSlide(currentSlide);
+                    } else {
+                        // Swipe left - next slide
+                        isVideoPaused = false;
+                        clearInterval(autoAdvanceInterval);
+                        currentSlide = (currentSlide + 1) % slides.length;
+                        showSlide(currentSlide);
+                    }
+                }
+            }
+        }
 
         // Show first slide
         slides[0].classList.add('active');
@@ -177,6 +248,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Handle video events for the current slide
             if (slides[index].tagName === 'VIDEO') {
                 const video = slides[index];
+                
+                // Add mobile-specific video attributes
+                if (isMobile) {
+                    video.setAttribute('playsinline', 'true');
+                    video.setAttribute('webkit-playsinline', 'true');
+                    video.muted = false; // Allow unmuted on mobile
+                }
                 
                 // Add event listeners for video control
                 video.addEventListener('play', () => {
@@ -222,19 +300,36 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (prevBtn && nextBtn) {
-            prevBtn.addEventListener('click', () => {
+            // Enhanced button handling for mobile
+            const handlePrevClick = () => {
                 isVideoPaused = false;
                 clearInterval(autoAdvanceInterval);
                 currentSlide = (currentSlide - 1 + slides.length) % slides.length;
                 showSlide(currentSlide);
-            });
-
-            nextBtn.addEventListener('click', () => {
+            };
+            
+            const handleNextClick = () => {
                 isVideoPaused = false;
                 clearInterval(autoAdvanceInterval);
                 currentSlide = (currentSlide + 1) % slides.length;
                 showSlide(currentSlide);
-            });
+            };
+            
+            prevBtn.addEventListener('click', handlePrevClick);
+            nextBtn.addEventListener('click', handleNextClick);
+            
+            // Add touch event handlers for better mobile responsiveness
+            if (isMobile) {
+                prevBtn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    handlePrevClick();
+                }, { passive: false });
+                
+                nextBtn.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    handleNextClick();
+                }, { passive: false });
+            }
         }
 
         // Start auto advance for the initial slide
