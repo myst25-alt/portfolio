@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add typewriter effect to the name
     const nameElement = document.getElementById('typewriter-name');
     if (nameElement) {
-        const nameText = 'FIRDOUS\nFATHIMA';
+        const nameText = 'FIRDOUS\nFATIMA';
         nameElement.innerHTML = '<span class="cursor">|</span>'; // Start with just cursor
         
         // After a short delay, start the typewriter effect
@@ -143,4 +143,134 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Removed gradient animation to improve performance
     // The hero section now uses static styling
+
+    // Slideshow functionality for images and videos
+    function initSlideshow(container) {
+        const slides = container.querySelectorAll('.slides > *');
+        const prevBtn = container.querySelector('.prev');
+        const nextBtn = container.querySelector('.next');
+        let currentSlide = 0;
+        let autoAdvanceInterval;
+        let isVideoPaused = false;
+
+        if (slides.length === 0) return;
+
+        // Show first slide
+        slides[0].classList.add('active');
+        slides[0].style.display = 'block';
+
+        function showSlide(index) {
+            slides.forEach((slide, idx) => {
+                slide.classList.remove('active');
+                slide.style.display = 'none';
+                
+                // Pause videos when not active
+                if (slide.tagName === 'VIDEO') {
+                    slide.pause();
+                    slide.currentTime = 0;
+                }
+            });
+            
+            slides[index].classList.add('active');
+            slides[index].style.display = 'block';
+            
+            // Handle video events for the current slide
+            if (slides[index].tagName === 'VIDEO') {
+                const video = slides[index];
+                
+                // Add event listeners for video control
+                video.addEventListener('play', () => {
+                    isVideoPaused = true;
+                    clearInterval(autoAdvanceInterval);
+                });
+                
+                video.addEventListener('pause', () => {
+                    if (!video.ended) {
+                        isVideoPaused = true;
+                        clearInterval(autoAdvanceInterval);
+                    }
+                });
+                
+                video.addEventListener('ended', () => {
+                    isVideoPaused = false;
+                    startAutoAdvance();
+                    // Auto advance to next slide when video ends
+                    setTimeout(() => {
+                        if (!isVideoPaused) {
+                            currentSlide = (currentSlide + 1) % slides.length;
+                            showSlide(currentSlide);
+                        }
+                    }, 1000);
+                });
+            } else {
+                // For images, ensure auto-advance is running
+                isVideoPaused = false;
+                startAutoAdvance();
+            }
+        }
+
+        function startAutoAdvance() {
+            clearInterval(autoAdvanceInterval);
+            if (!isVideoPaused) {
+                autoAdvanceInterval = setInterval(() => {
+                    if (!isVideoPaused) {
+                        currentSlide = (currentSlide + 1) % slides.length;
+                        showSlide(currentSlide);
+                    }
+                }, 5000);
+            }
+        }
+
+        if (prevBtn && nextBtn) {
+            prevBtn.addEventListener('click', () => {
+                isVideoPaused = false;
+                clearInterval(autoAdvanceInterval);
+                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
+                showSlide(currentSlide);
+            });
+
+            nextBtn.addEventListener('click', () => {
+                isVideoPaused = false;
+                clearInterval(autoAdvanceInterval);
+                currentSlide = (currentSlide + 1) % slides.length;
+                showSlide(currentSlide);
+            });
+        }
+
+        // Start auto advance for the initial slide
+        if (slides[0] && slides[0].tagName === 'IMG') {
+            startAutoAdvance();
+        }
+        
+        // Handle initial slide if it's a video
+        if (slides[0] && slides[0].tagName === 'VIDEO') {
+            const video = slides[0];
+            video.addEventListener('play', () => {
+                isVideoPaused = true;
+                clearInterval(autoAdvanceInterval);
+            });
+            
+            video.addEventListener('pause', () => {
+                if (!video.ended) {
+                    isVideoPaused = true;
+                    clearInterval(autoAdvanceInterval);
+                }
+            });
+            
+            video.addEventListener('ended', () => {
+                isVideoPaused = false;
+                startAutoAdvance();
+                setTimeout(() => {
+                    if (!isVideoPaused) {
+                        currentSlide = (currentSlide + 1) % slides.length;
+                        showSlide(currentSlide);
+                    }
+                }, 1000);
+            });
+        }
+    }
+
+    // Initialize all slideshows
+    const slideshowContainers = document.querySelectorAll('.slideshow-container, .video-slideshow-container');
+    slideshowContainers.forEach(initSlideshow);
 });
