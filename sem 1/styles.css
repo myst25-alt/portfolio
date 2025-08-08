@@ -117,6 +117,103 @@ main {
     box-shadow: 0 4px 12px rgba(27, 107, 77, 0.3);
 }
 
+/* Disable animations on Android for better performance */
+.android-device .nav-button:hover,
+.android-device .nav-button:active,
+.android-device .card:hover,
+.android-device .prev:hover,
+.android-device .next:hover,
+.android-device button:hover,
+.android-device a:hover {
+    transform: none !important;
+    transition: none !important;
+}
+
+/* Android-specific: Remove ALL transitions and animations from navigation buttons */
+.android-device .nav-button,
+.android-device a[class*="nav-button"],
+.android-device div[style*="transition"] .nav-button,
+.android-device a[style*="transition"] {
+    transition: none !important;
+    transform: none !important;
+    animation: none !important;
+    -webkit-transform: none !important;
+    -webkit-transition: none !important;
+    -webkit-animation: none !important;
+}
+
+/* Android-specific layout: Consistent sizing for all image containers */
+.android-device .slideshow-container,
+.android-device .video-slideshow-container,
+.android-device .card,
+.android-device .subsection,
+.android-device .multimedia-grid-item,
+.android-device .event-section,
+.android-device .semester-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 0 1.5rem 0 !important;
+    padding: 1rem !important;
+    box-sizing: border-box !important;
+}
+
+.android-device .content-grid,
+.android-device .multimedia-grid-container,
+.android-device .training-programs-grid {
+    grid-template-columns: 1fr !important;
+    gap: 1.5rem !important;
+    width: 100% !important;
+}
+
+/* Android-specific navigation button improvements */
+.android-device div[style*="position: absolute"][style*="top: 2rem"] {
+    position: fixed !important;
+    top: 10px !important;
+    left: 10px !important;
+    right: 10px !important;
+    z-index: 9999 !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+    padding: 0.5rem !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1) !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+}
+
+.android-device div[style*="position: absolute"][style*="top: 2rem"] .nav-button {
+    font-size: 0.8rem !important;
+    padding: 0.5rem 0.8rem !important;
+    min-width: 100px !important;
+    white-space: nowrap !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* General navigation button fix for all devices */
+div[style*="position: absolute"][style*="top: 2rem"] {
+    z-index: 9999 !important;
+    display: flex !important;
+    visibility: visible !important;
+    position: absolute !important;
+}
+
+div[style*="position: absolute"][style*="top: 2rem"] .nav-button {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 10000 !important;
+}
+
+/* Force navigation buttons to be visible on page load */
+.nav-button {
+    display: inline-block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
 /* Section Styles */
 section {
     width: 100%;
@@ -808,7 +905,7 @@ section h2::after {
     
     /* Semester Page Header - Mobile Fix */
     div[style*="min-height: 100vh"] h1 {
-        font-size: 3rem !important;
+        font-size: 3.5rem !important;
         line-height: 1.1 !important;
         margin: 0.5rem 0 !important;
         padding: 0 1rem !important;
@@ -827,15 +924,18 @@ section h2::after {
         top: 1rem !important;
         left: 1rem !important;
         right: 1rem !important;
-        flex-direction: column !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
         gap: 0.5rem !important;
+        justify-content: center !important;
         align-items: center !important;
     }
     
     div[style*="position: absolute"][style*="top: 2rem"] .nav-button {
         padding: 0.6rem 1rem !important;
         font-size: 0.9rem !important;
-        min-width: 120px !important;
+        min-width: 110px !important;
+        flex: 0 1 auto !important;
         text-align: center !important;
     }
     
@@ -1018,7 +1118,7 @@ section h2::after {
     
     /* Semester Page Header - Ultra Mobile Fix */
     div[style*="min-height: 100vh"] h1 {
-        font-size: 2.5rem !important;
+        font-size: 3rem !important;
         line-height: 1.1 !important;
         margin: 0.5rem 0 !important;
         padding: 0 0.5rem !important;
@@ -1038,15 +1138,18 @@ section h2::after {
         top: 0.5rem !important;
         left: 0.5rem !important;
         right: 0.5rem !important;
-        flex-direction: column !important;
+        flex-direction: row !important;
+        flex-wrap: wrap !important;
         gap: 0.25rem !important;
+        justify-content: center !important;
         align-items: center !important;
     }
     
     div[style*="position: absolute"][style*="top: 2rem"] .nav-button {
         padding: 0.5rem 0.8rem !important;
         font-size: 0.8rem !important;
-        min-width: 100px !important;
+        min-width: 90px !important;
+        flex: 0 1 auto !important;
         text-align: center !important;
     }
     

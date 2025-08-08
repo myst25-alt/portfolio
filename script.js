@@ -33,6 +33,73 @@ document.addEventListener('DOMContentLoaded', function() {
             lastTouchEnd = now;
         }, { passive: false });
     }
+
+    // Enhanced navigation button touch handling to prevent accidental navigation during scrolling
+    const navButtons = document.querySelectorAll('.nav-button');
+    
+    navButtons.forEach(button => {
+        let touchStartY = 0;
+        let touchStartX = 0;
+        let touchStartTime = 0;
+        let isTouchScrolling = false;
+        
+        button.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+            touchStartX = e.touches[0].clientX;
+            touchStartTime = Date.now();
+            isTouchScrolling = false;
+        }, { passive: true });
+        
+        button.addEventListener('touchmove', function(e) {
+            const touchMoveY = e.touches[0].clientY;
+            const touchMoveX = e.touches[0].clientX;
+            const deltaY = Math.abs(touchMoveY - touchStartY);
+            const deltaX = Math.abs(touchMoveX - touchStartX);
+            
+            // If significant vertical movement is detected, it's likely scrolling
+            if (deltaY > 10 || deltaX > 10) {
+                isTouchScrolling = true;
+            }
+        }, { passive: true });
+        
+        button.addEventListener('touchend', function(e) {
+            const touchDuration = Date.now() - touchStartTime;
+            
+            // Prevent navigation if:
+            // 1. Touch was detected as scrolling
+            // 2. Touch duration was too long (likely a scroll/hold gesture)
+            // 3. Touch was too brief (likely accidental)
+            if (isTouchScrolling || touchDuration > 800 || touchDuration < 50) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+        }, { passive: false });
+        
+        // Add click handler specifically for mobile to double-check intent
+        if (isMobile) {
+            button.addEventListener('click', function(e) {
+                if (isTouchScrolling) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+            }, { passive: false });
+        }
+        
+        // Add navigation click handler to hide header before navigation
+        button.addEventListener('click', function(e) {
+            // Don't hide header if navigation was prevented
+            if (isTouchScrolling) return;
+            
+            // Hide the sticky header immediately before navigation
+            if (stickyHeader) {
+                stickyHeader.classList.remove('visible');
+                // Store that we're navigating to prevent header from showing
+                sessionStorage.setItem('navigating', 'true');
+            }
+        }, { passive: true });
+    });
     
     // Sticky header functionality
     const stickyHeader = document.getElementById('stickyHeader');
@@ -51,6 +118,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
+    // Mobile Video and Media Optimization
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('preload', 'metadata');
+        
+        if (window.innerWidth <= 768) {
+            video.setAttribute('preload', 'none');
+        }
+        
+        video.addEventListener('error', function() {
+            console.log('Video failed to load:', this.src);
+        });
+        
+        video.addEventListener('loadedmetadata', function() {
+            if (window.innerWidth <= 768) {
+                this.style.maxHeight = '60vh';
+                this.style.width = '100%';
+                this.style.objectFit = 'contain';
+            }
+        });
+    });
+    
+    // Handle orientation changes for mobile
+    window.addEventListener('orientationchange', function() {
+        setTimeout(() => {
+            videos.forEach(video => {
+                if (window.innerWidth <= 768) {
+                    video.style.maxHeight = '60vh';
+                    video.style.width = '100%';
+                }
+            });
+        }, 500);
+    });
+
     // Multiple scroll event listeners for better Windows compatibility
     window.addEventListener('scroll', handleScroll, { passive: true });
     window.addEventListener('wheel', handleScroll, { passive: true });

@@ -1,10 +1,65 @@
 // Portfolio JavaScript functionality
 document.addEventListener('DOMContentLoaded', function() {
+    // Mobile detection
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isAndroid = /Android/i.test(navigator.userAgent);
+    
+    // Add mobile/android classes to body for CSS targeting
+    if (isMobile) {
+        document.body.classList.add('mobile-device');
+    }
+    if (isAndroid) {
+        document.body.classList.add('android-device');
+    }
+    
+    // Hide home button on Android devices
+    if (isAndroid) {
+        const homeButtons = document.querySelectorAll('a[href*="../index.html"], a.nav-button');
+        homeButtons.forEach(button => {
+            if (button.textContent.includes('🏠') || button.textContent.includes('Home')) {
+                button.style.display = 'none';
+            }
+        });
+    }
+    
     // Sticky header functionality
     const stickyHeader = document.getElementById('stickyHeader');
     
+    // Hide header immediately on page load to prevent flashing
+    if (stickyHeader) {
+        stickyHeader.classList.remove('visible');
+        stickyHeader.style.display = 'none';
+        // Clear navigation state after page load and restore display
+        setTimeout(() => {
+            sessionStorage.removeItem('navigating');
+            stickyHeader.style.display = '';
+        }, 750);
+    }
+    
+    // Add navigation button click handlers to hide header
+    const navButtons = document.querySelectorAll('.nav-button');
+    navButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            // Hide the sticky header immediately before navigation
+            if (stickyHeader) {
+                stickyHeader.classList.remove('visible');
+                stickyHeader.style.display = 'none';
+                // Store that we're navigating to prevent header from showing
+                sessionStorage.setItem('navigating', 'true');
+            }
+        }, { passive: true });
+    });
+    
     // Function to handle scroll events
     function handleScroll() {
+        // Check if we're in a navigation state and prevent header from showing
+        if (sessionStorage.getItem('navigating') === 'true') {
+            if (stickyHeader) {
+                stickyHeader.classList.remove('visible');
+            }
+            return;
+        }
+        
         const scrollPosition = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
         
         // Show header when scrolled past 100px
@@ -36,6 +91,30 @@ document.addEventListener('DOMContentLoaded', function() {
     // Additional Windows-specific scroll detection
     document.addEventListener('mousewheel', requestTick, { passive: true }); // IE/Edge
     document.addEventListener('DOMMouseScroll', requestTick, { passive: true }); // Firefox
+
+    // Mobile Video and Media Optimization
+    const videos = document.querySelectorAll('video');
+    videos.forEach(video => {
+        video.setAttribute('playsinline', 'true');
+        video.setAttribute('webkit-playsinline', 'true');
+        video.setAttribute('preload', 'metadata');
+        
+        if (window.innerWidth <= 768) {
+            video.setAttribute('preload', 'none');
+        }
+        
+        video.addEventListener('error', function() {
+            console.log('Video failed to load:', this.src);
+        });
+        
+        video.addEventListener('loadedmetadata', function() {
+            if (window.innerWidth <= 768) {
+                this.style.maxHeight = '60vh';
+                this.style.width = '100%';
+                this.style.objectFit = 'contain';
+            }
+        });
+    });
 
     // Smooth scrolling for internal links
     const links = document.querySelectorAll('a[href^="#"]');
