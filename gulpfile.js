@@ -1,5 +1,11 @@
 const { src, dest, series, parallel } = require('gulp');
-const sharp = require('sharp');
+let sharp;
+try {
+  sharp = require('sharp');
+} catch (e) {
+  console.warn('Warning: sharp not available in this environment. Image resizing will be skipped.');
+  sharp = null;
+}
 const through2 = require('through2');
 const imagemin = require('gulp-imagemin');
 const cleanCSS = require('gulp-clean-css');
@@ -23,6 +29,12 @@ function clean() {
 }
 
 function images() {
+  if (!sharp) {
+    // Fallback: copy images as-is into dist preserving paths
+    return src(paths.images, { base: './' })
+      .pipe(dest('dist'));
+  }
+
   return src(paths.images, { base: './' })
     .pipe(through2.obj(function (file, _, cb) {
       if (file.isNull()) return cb(null, file);
@@ -63,7 +75,12 @@ function images() {
           this.push(out);
         });
         cb();
-      }).catch(cb);
+      }).catch(err => {
+        console.warn('sharp error - falling back to copying original image:', err.message || err);
+        // on error, push original file through
+        this.push(file);
+        cb();
+      });
     }))
   .pipe(dest('dist'));
 }
