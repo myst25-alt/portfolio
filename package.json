@@ -4,9 +4,9 @@
   "description": "Build pipeline for optimizing the portfolio site: image conversion, responsive sizes, HTML rewrites, and asset minification.",
   "private": true,
   "scripts": {
-    "build": "gulp build",
-    "clean": "gulp clean",
-    "dev": "gulp"
+    "build": "node ./node_modules/gulp/bin/gulp.js build",
+    "clean": "node ./node_modules/gulp/bin/gulp.js clean",
+    "dev": "node ./node_modules/gulp/bin/gulp.js"
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.12",
