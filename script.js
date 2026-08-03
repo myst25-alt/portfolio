@@ -1,11 +1,10 @@
-// Portfolio JavaScript functionality - Enhanced Mobile Support
+// Portfolio JavaScript functionality - Consolidated & Optimized
 document.addEventListener('DOMContentLoaded', function() {
-    // Mobile detection
+    // 1.1 Mobile detection
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isAndroid = /Android/i.test(navigator.userAgent);
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     
-    // Add mobile class to body for CSS targeting
     if (isMobile) {
         document.body.classList.add('mobile-device');
     }
@@ -16,109 +15,70 @@ document.addEventListener('DOMContentLoaded', function() {
         document.body.classList.add('ios-device');
     }
     
-    // Prevent zoom on form elements (mobile)
+    // 1.4 Touch/zoom guard (Pinch guard only)
     if (isMobile) {
         document.addEventListener('touchstart', function(e) {
             if (e.touches.length > 1) {
                 e.preventDefault();
             }
         }, { passive: false });
-        
-        let lastTouchEnd = 0;
-        document.addEventListener('touchend', function(e) {
-            const now = Date.now();
-            if (now - lastTouchEnd <= 300) {
-                e.preventDefault();
-            }
-            lastTouchEnd = now;
-        }, { passive: false });
     }
 
-    // Enhanced navigation button touch handling to prevent accidental navigation during scrolling
-    const navButtons = document.querySelectorAll('.nav-button');
+    // 1.2 Sticky header setup
+    const stickyHeader = document.getElementById('stickyHeader');
+    const heroSection = document.getElementById('hero');
     
+    if (stickyHeader) {
+        stickyHeader.classList.remove('visible');
+        stickyHeader.style.display = 'none';
+        setTimeout(() => {
+            sessionStorage.removeItem('navigating');
+            stickyHeader.style.display = '';
+        }, 750);
+    }
+    
+    const navButtons = document.querySelectorAll('.nav-button');
     navButtons.forEach(button => {
-        let touchStartY = 0;
-        let touchStartX = 0;
-        let touchStartTime = 0;
-        let isTouchScrolling = false;
-        
-        button.addEventListener('touchstart', function(e) {
-            touchStartY = e.touches[0].clientY;
-            touchStartX = e.touches[0].clientX;
-            touchStartTime = Date.now();
-            isTouchScrolling = false;
-        }, { passive: true });
-        
-        button.addEventListener('touchmove', function(e) {
-            const touchMoveY = e.touches[0].clientY;
-            const touchMoveX = e.touches[0].clientX;
-            const deltaY = Math.abs(touchMoveY - touchStartY);
-            const deltaX = Math.abs(touchMoveX - touchStartX);
-            
-            // If significant vertical movement is detected, it's likely scrolling
-            if (deltaY > 10 || deltaX > 10) {
-                isTouchScrolling = true;
-            }
-        }, { passive: true });
-        
-        button.addEventListener('touchend', function(e) {
-            const touchDuration = Date.now() - touchStartTime;
-            
-            // Prevent navigation if:
-            // 1. Touch was detected as scrolling
-            // 2. Touch duration was too long (likely a scroll/hold gesture)
-            // 3. Touch was too brief (likely accidental)
-            if (isTouchScrolling || touchDuration > 800 || touchDuration < 50) {
-                e.preventDefault();
-                e.stopPropagation();
-                return false;
-            }
-        }, { passive: false });
-        
-        // Add click handler specifically for mobile to double-check intent
-        if (isMobile) {
-            button.addEventListener('click', function(e) {
-                if (isTouchScrolling) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    return false;
-                }
-            }, { passive: false });
-        }
-        
-        // Add navigation click handler to hide header before navigation
-        button.addEventListener('click', function(e) {
-            // Don't hide header if navigation was prevented
-            if (isTouchScrolling) return;
-            
-            // Hide the sticky header immediately before navigation
+        button.addEventListener('click', function() {
             if (stickyHeader) {
                 stickyHeader.classList.remove('visible');
-                // Store that we're navigating to prevent header from showing
                 sessionStorage.setItem('navigating', 'true');
             }
         }, { passive: true });
     });
     
-    // Sticky header functionality
-    const stickyHeader = document.getElementById('stickyHeader');
-    const heroSection = document.getElementById('hero');
-    
-    // Function to handle scroll events
     function handleScroll() {
-        const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-        const scrollPosition = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+        if (!stickyHeader) return;
+        if (sessionStorage.getItem('navigating') === 'true') {
+            stickyHeader.classList.remove('visible');
+            return;
+        }
         
-        // Show header when scrolled past 80% of hero section
-        if (scrollPosition > heroBottom * 0.8) {
+        const scrollPosition = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+        const threshold = heroSection ? (heroSection.offsetTop + heroSection.offsetHeight) * 0.8 : 100;
+        
+        if (scrollPosition > threshold) {
             stickyHeader.classList.add('visible');
         } else {
             stickyHeader.classList.remove('visible');
         }
     }
     
-    // Mobile Video and Media Optimization
+    let ticking = false;
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                handleScroll();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }
+    
+    window.addEventListener('scroll', requestTick, { passive: true });
+    window.addEventListener('wheel', requestTick, { passive: true });
+
+    // 1.3 Mobile Video Optimization
     const videos = document.querySelectorAll('video');
     videos.forEach(video => {
         video.setAttribute('playsinline', 'true');
@@ -142,7 +102,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Handle orientation changes for mobile
     window.addEventListener('orientationchange', function() {
         setTimeout(() => {
             videos.forEach(video => {
@@ -154,54 +113,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     });
 
-    // Multiple scroll event listeners for better Windows compatibility
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    window.addEventListener('wheel', handleScroll, { passive: true });
-    document.addEventListener('scroll', handleScroll, { passive: true });
-    
-    // Throttle scroll events for better performance
-    let ticking = false;
-    function requestTick() {
-        if (!ticking) {
-            requestAnimationFrame(handleScroll);
-            ticking = true;
-            setTimeout(() => { ticking = false; }, 16); // ~60fps
-        }
-    }
-    
-    window.addEventListener('scroll', requestTick, { passive: true });
-    window.addEventListener('wheel', requestTick, { passive: true });
-    
-    // Additional Windows-specific scroll detection
-    document.addEventListener('mousewheel', requestTick, { passive: true }); // IE/Edge
-    document.addEventListener('DOMMouseScroll', requestTick, { passive: true }); // Firefox
-    
-    // Intersection Observer for sticky header as backup
-    const headerObserver = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (!entry.isIntersecting) {
-                stickyHeader.classList.add('visible');
-            } else {
-                stickyHeader.classList.remove('visible');
-            }
-        });
-    }, {
-        threshold: 0.2,
-        rootMargin: '0px 0px -20% 0px'
-    });
-    
-    headerObserver.observe(heroSection);
-
-    // Smooth scrolling for internal links
+    // 1.5 In-page smooth scroll
     const links = document.querySelectorAll('a[href^="#"]');
-    
     links.forEach(link => {
         link.addEventListener('click', function(e) {
-            e.preventDefault();
             const targetId = this.getAttribute('href').substring(1);
+            if (!targetId) return;
             const targetElement = document.getElementById(targetId);
-            
             if (targetElement) {
+                e.preventDefault();
                 targetElement.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
@@ -210,49 +130,58 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Add intersection observer for animations
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-
-    const observer = new IntersectionObserver(function(entries) {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
+    // 1.5 Card hover effects (touch devices skip JS hovers)
+    if (!window.matchMedia('(hover: none) and (pointer: coarse)').matches) {
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
         });
-    }, observerOptions);
+    }
 
-    // Observe all sections for animation
+    // 1.6 Section reveal animations
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const sections = document.querySelectorAll('section');
-    sections.forEach(section => {
-        section.style.opacity = '0';
-        section.style.transform = 'translateY(30px)';
-        section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        observer.observe(section);
-    });
 
-    // Card hover effects
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', function() {
-            this.style.transform = 'translateY(-5px) scale(1.02)';
+    if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+        sections.forEach(section => {
+            section.style.opacity = '1';
+            section.style.transform = 'none';
         });
-        
-        card.addEventListener('mouseleave', function() {
-            this.style.transform = 'translateY(0) scale(1)';
-        });
-    });
+    } else {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
 
-    // Add typewriter effect to the name
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(30px)';
+            section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(section);
+        });
+    }
+
+    // 1.7 Typewriter (index only)
     const nameElement = document.getElementById('typewriter-name');
     if (nameElement) {
         const nameText = 'FIRDOUS\nFATIMA';
-        nameElement.innerHTML = '<span class="cursor">|</span>'; // Start with just cursor
+        nameElement.innerHTML = '<span class="cursor">|</span>';
         
-        // After a short delay, start the typewriter effect
         setTimeout(() => {
             let i = 0;
             let currentText = '';
@@ -267,7 +196,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     i++;
                     setTimeout(typeWriter, 150);
                 } else {
-                    // Remove cursor after typing is complete
                     setTimeout(() => {
                         nameElement.innerHTML = currentText;
                     }, 2000);
@@ -278,113 +206,69 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
 
-    // Removed gradient animation to improve performance
-    // The hero section now uses static styling
-
-    // Slideshow functionality for images and videos - Enhanced Mobile Support
-    function initSlideshow(container) {
+    // 1.8 Slideshow engine rewrite
+    function initSlideshow(container, index) {
         const slides = container.querySelectorAll('.slides > *');
+        if (slides.length === 0) return;
+
         const prevBtn = container.querySelector('.prev');
         const nextBtn = container.querySelector('.next');
+        const counter = container.parentElement ? container.parentElement.querySelector('.slide-counter') : null;
+        
         let currentSlide = 0;
-        let autoAdvanceInterval;
+        let autoAdvanceInterval = null;
         let isVideoPaused = false;
         let touchStartX = 0;
         let touchEndX = 0;
 
-        if (slides.length === 0) return;
-
-        // Add touch/swipe support for mobile
-        if (isMobile) {
-            const slidesContainer = container.querySelector('.slides');
-            
-            slidesContainer.addEventListener('touchstart', function(e) {
-                touchStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
-            
-            slidesContainer.addEventListener('touchend', function(e) {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
-            }, { passive: true });
-            
-            function handleSwipe() {
-                const swipeThreshold = 50;
-                const swipeDistance = touchEndX - touchStartX;
-                
-                if (Math.abs(swipeDistance) > swipeThreshold) {
-                    if (swipeDistance > 0) {
-                        // Swipe right - previous slide
-                        isVideoPaused = false;
-                        clearInterval(autoAdvanceInterval);
-                        currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-                        showSlide(currentSlide);
-                    } else {
-                        // Swipe left - next slide
-                        isVideoPaused = false;
-                        clearInterval(autoAdvanceInterval);
-                        currentSlide = (currentSlide + 1) % slides.length;
-                        showSlide(currentSlide);
-                    }
-                }
+        function updateCounter() {
+            if (counter) {
+                counter.textContent = `${currentSlide + 1} / ${slides.length}`;
             }
         }
 
-        // Show first slide
-        slides[0].classList.add('active');
-        slides[0].style.display = 'block';
+        // Attach video listeners exactly once at init
+        slides.forEach(slide => {
+            if (slide.tagName === 'VIDEO') {
+                slide.addEventListener('play', () => {
+                    isVideoPaused = true;
+                    clearInterval(autoAdvanceInterval);
+                });
+                slide.addEventListener('pause', () => {
+                    if (!slide.ended) {
+                        isVideoPaused = true;
+                        clearInterval(autoAdvanceInterval);
+                    }
+                });
+                slide.addEventListener('ended', function() {
+                    if (slides[currentSlide] !== this) return;
+                    setTimeout(() => {
+                        currentSlide = (currentSlide + 1) % slides.length;
+                        showSlide(currentSlide);
+                    }, 1000);
+                });
+            }
+        });
 
-        function showSlide(index) {
-            slides.forEach((slide, idx) => {
+        function showSlide(i) {
+            clearInterval(autoAdvanceInterval);
+            slides.forEach(slide => {
                 slide.classList.remove('active');
                 slide.style.display = 'none';
-                
-                // Pause videos when not active
                 if (slide.tagName === 'VIDEO') {
                     slide.pause();
                     slide.currentTime = 0;
                 }
             });
-            
-            slides[index].classList.add('active');
-            slides[index].style.display = 'block';
-            
-            // Handle video events for the current slide
-            if (slides[index].tagName === 'VIDEO') {
-                const video = slides[index];
-                
-                // Add mobile-specific video attributes
-                if (isMobile) {
-                    video.setAttribute('playsinline', 'true');
-                    video.setAttribute('webkit-playsinline', 'true');
-                    video.muted = false; // Allow unmuted on mobile
-                }
-                
-                // Add event listeners for video control
-                video.addEventListener('play', () => {
-                    isVideoPaused = true;
-                    clearInterval(autoAdvanceInterval);
-                });
-                
-                video.addEventListener('pause', () => {
-                    if (!video.ended) {
-                        isVideoPaused = true;
-                        clearInterval(autoAdvanceInterval);
-                    }
-                });
-                
-                video.addEventListener('ended', () => {
-                    isVideoPaused = false;
-                    startAutoAdvance();
-                    // Auto advance to next slide when video ends
-                    setTimeout(() => {
-                        if (!isVideoPaused) {
-                            currentSlide = (currentSlide + 1) % slides.length;
-                            showSlide(currentSlide);
-                        }
-                    }, 1000);
-                });
+
+            currentSlide = i;
+            slides[currentSlide].classList.add('active');
+            slides[currentSlide].style.display = 'block';
+            updateCounter();
+
+            if (slides[currentSlide].tagName === 'VIDEO') {
+                isVideoPaused = true;
             } else {
-                // For images, ensure auto-advance is running
                 isVideoPaused = false;
                 startAutoAdvance();
             }
@@ -394,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function() {
             clearInterval(autoAdvanceInterval);
             if (!isVideoPaused) {
                 autoAdvanceInterval = setInterval(() => {
-                    if (!isVideoPaused) {
+                    if (slides[currentSlide] && slides[currentSlide].tagName !== 'VIDEO') {
                         currentSlide = (currentSlide + 1) % slides.length;
                         showSlide(currentSlide);
                     }
@@ -403,72 +287,44 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (prevBtn && nextBtn) {
-            // Enhanced button handling for mobile
-            const handlePrevClick = () => {
-                isVideoPaused = false;
-                clearInterval(autoAdvanceInterval);
-                currentSlide = (currentSlide - 1 + slides.length) % slides.length;
-                showSlide(currentSlide);
-            };
-            
-            const handleNextClick = () => {
-                isVideoPaused = false;
-                clearInterval(autoAdvanceInterval);
-                currentSlide = (currentSlide + 1) % slides.length;
-                showSlide(currentSlide);
-            };
-            
-            prevBtn.addEventListener('click', handlePrevClick);
-            nextBtn.addEventListener('click', handleNextClick);
-            
-            // Add touch event handlers for better mobile responsiveness
-            if (isMobile) {
-                prevBtn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    handlePrevClick();
-                }, { passive: false });
-                
-                nextBtn.addEventListener('touchend', function(e) {
-                    e.preventDefault();
-                    handleNextClick();
-                }, { passive: false });
+            prevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSlide((currentSlide - 1 + slides.length) % slides.length);
+            });
+
+            nextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                showSlide((currentSlide + 1) % slides.length);
+            });
+        }
+
+        if (isMobile) {
+            const slidesContainer = container.querySelector('.slides');
+            if (slidesContainer) {
+                slidesContainer.addEventListener('touchstart', function(e) {
+                    touchStartX = e.changedTouches[0].screenX;
+                }, { passive: true });
+
+                slidesContainer.addEventListener('touchend', function(e) {
+                    touchEndX = e.changedTouches[0].screenX;
+                    const swipeThreshold = 50;
+                    const swipeDistance = touchEndX - touchStartX;
+                    if (Math.abs(swipeDistance) > swipeThreshold) {
+                        if (swipeDistance > 0) {
+                            showSlide((currentSlide - 1 + slides.length) % slides.length);
+                        } else {
+                            showSlide((currentSlide + 1) % slides.length);
+                        }
+                    }
+                }, { passive: true });
             }
         }
 
-        // Start auto advance for the initial slide
-        if (slides[0] && slides[0].tagName === 'IMG') {
-            startAutoAdvance();
-        }
-        
-        // Handle initial slide if it's a video
-        if (slides[0] && slides[0].tagName === 'VIDEO') {
-            const video = slides[0];
-            video.addEventListener('play', () => {
-                isVideoPaused = true;
-                clearInterval(autoAdvanceInterval);
-            });
-            
-            video.addEventListener('pause', () => {
-                if (!video.ended) {
-                    isVideoPaused = true;
-                    clearInterval(autoAdvanceInterval);
-                }
-            });
-            
-            video.addEventListener('ended', () => {
-                isVideoPaused = false;
-                startAutoAdvance();
-                setTimeout(() => {
-                    if (!isVideoPaused) {
-                        currentSlide = (currentSlide + 1) % slides.length;
-                        showSlide(currentSlide);
-                    }
-                }, 1000);
-            });
-        }
+        showSlide(0);
     }
 
-    // Initialize all slideshows
     const slideshowContainers = document.querySelectorAll('.slideshow-container, .video-slideshow-container');
-    slideshowContainers.forEach(initSlideshow);
+    slideshowContainers.forEach((container, index) => {
+        initSlideshow(container, index);
+    });
 });
